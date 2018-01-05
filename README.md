@@ -47,6 +47,12 @@ Setup the Keycloak.
 1. Open https://keycloak.k8s.example.com/auth/admin/devops/console/.
 1. Change your password.
 
+### Grafana
+
+```sh
+helm install stable/grafana --namespace monitoring --name grafana
+kubectl apply -f monitoring
+```
 
 ## Contribution
 
