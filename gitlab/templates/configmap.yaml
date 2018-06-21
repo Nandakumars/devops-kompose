@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "gitlab.fullname" . }}
+  labels:
+    app: {{ template "gitlab.name" . }}
+    chart: {{ template "gitlab.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  GITLAB_OMNIBUS_CONFIG: |
+    gitlab_workhorse['listen_network'] = 'tcp'
+    gitlab_workhorse['listen_addr'] = '0.0.0.0:8005'
+    external_url {{ .Values.gitlab.externalURL | quote }}
+    gitlab_rails['db_host']     = {{ .Values.gitlab.dbHost | quote }}
+    gitlab_rails['db_database'] = {{ .Values.gitlab.dbName | quote }}
+    gitlab_rails['db_username'] = {{ .Values.gitlab.dbUsername | quote }}
+    gitlab_rails['db_password'] = {{ .Values.gitlab.dbPassword | quote }}
+{{- if .Values.gitlab.saml.enabled }}
+    gitlab_rails['omniauth_enabled'] = true
+    gitlab_rails['omniauth_allow_single_sign_on'] = ['saml']
+    gitlab_rails['omniauth_block_auto_created_users'] = false
+    gitlab_rails['omniauth_auto_link_saml_user'] = true
+    gitlab_rails['omniauth_providers'] = [
+      {
+        name: 'saml',
+        label: {{ .Values.saml.buttonLabel | quote }},
+        args: {
+          assertion_consumer_service_url: '{{ .Values.gitlab.externalURL }}/users/auth/saml/callback',
+          idp_cert: {{ .Values.gitlab.saml.IDPCert | quote }},
+          idp_sso_target_url: {{ .Values.gitlab.saml.IDPSSOTargetURL | quote }},
+          issuer: {{ .Values.gitlab.externalURL | quote }},
+          name_identifier_format: 'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent',
+          attribute_statements: { username: ['username'] }
+        }
+      }
+    ]
+{{- end }}
+    nginx['enable'] = false
+    registry_nginx['enable'] = false
+    mattermost_nginx['enable'] = false
+    postgresql['enable'] = false
+    registry['enable'] = false
+    mattermost['enable'] = false
+    prometheus['enable'] = false
