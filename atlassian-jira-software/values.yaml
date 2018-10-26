@@ -2,7 +2,7 @@
 
 image:
   repository: cptactionhank/atlassian-jira-software
-  tag: 7.10.1
+  tag: latest
   pullPolicy: IfNotPresent
 
 jira:
